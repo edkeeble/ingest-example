@@ -31,7 +31,7 @@ class SpireToStac(Transformer[SpireItem, StacItem]):
 
 
 class LoadToPgstac(Collector[StacItem, StacItem]):
-    batch_size: int = 500
+    batch_size: int = 3
 
     @classmethod
     def execute(self, input: Sequence[StacItem]) -> StacItem:
@@ -40,7 +40,7 @@ class LoadToPgstac(Collector[StacItem, StacItem]):
         return input[0]
 
 
-spire_pipeline = Pipeline("Spire Ingest", steps=[ExtractSpire, SpireToStac])
+spire_pipeline = Pipeline("Spire Ingest", steps=[ExtractSpire, SpireToStac, LoadToPgstac])
 
 csda_app = IngestApp(
     "CSDA Ingest",
