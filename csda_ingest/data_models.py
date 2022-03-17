@@ -2,12 +2,6 @@
 from typing import Dict
 from pydantic import BaseModel
 
-
-class S3Item(BaseModel):
-    bucket: str
-    key: str
-
-
 class SpireItem(BaseModel):
     id: int
     name: str

@@ -1,21 +1,17 @@
 import pathlib
 from typing import Sequence
 from ingest.app import IngestApp
+from ingest.data_types import S3Object
 from ingest.pipeline import Pipeline
 from ingest.step import Transformer, Collector
-from csda_ingest.data_models import S3Item, SpireItem, StacItem, Nothing
+from ingest.trigger import S3Filter, S3ObjectCreated
+from csda_ingest.data_models import SpireItem, StacItem, Nothing
 
 
-class ExtractSpire(Transformer[S3Item, SpireItem]):
+class ExtractSpire(Transformer[S3Object, SpireItem]):
     @classmethod
-    def execute(self, input: S3Item) -> SpireItem:
-        return SpireItem(id=1, name="test", location=input.key)
-
-
-class DoNothing(Transformer[StacItem, Nothing]):
-    @classmethod
-    def execute(self, input: StacItem) -> Nothing:
-        return Nothing()
+    def execute(self, input: S3Object) -> SpireItem:
+        return SpireItem(id=1, name=input.bucket, location=input.key)
 
 
 class SpireToStac(Transformer[SpireItem, StacItem]):
@@ -40,7 +36,14 @@ class LoadToPgstac(Collector[StacItem, StacItem]):
         return input[0]
 
 
-spire_pipeline = Pipeline("Spire Ingest", steps=[ExtractSpire, SpireToStac, LoadToPgstac])
+spire_pipeline = Pipeline(
+    "Spire Ingest",
+    trigger=S3ObjectCreated(
+        bucket_name="ekeeble-ingest-test",
+        object_filter=S3Filter(prefix="inbox", suffix=".json"),
+    ),
+    steps=[ExtractSpire, SpireToStac, LoadToPgstac],
+)
 
 csda_app = IngestApp(
     "CSDA Ingest",
