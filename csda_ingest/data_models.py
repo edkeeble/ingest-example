@@ -2,10 +2,11 @@
 from typing import Dict
 from pydantic import BaseModel
 
+
 class SpireItem(BaseModel):
-    id: int
+    id: str
     name: str
-    location: str
+    location: int
 
 
 class PlanetItem(BaseModel):
@@ -15,7 +16,7 @@ class PlanetItem(BaseModel):
 
 
 class StacItem(BaseModel):
-    id: int
+    id: str
     properties: Dict
 
 
