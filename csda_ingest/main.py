@@ -1,26 +1,14 @@
-import pathlib
+from pathlib import Path
 from typing import Sequence
 from ingest.app import IngestApp
-from ingest.data_types import S3Object
-from ingest.permissions import S3ReadAccess
+
+# from ingest.data_types import S3Object
+# from ingest.permissions import S3ReadAccess
 from ingest.pipeline import Pipeline
 from ingest.step import Transformer, Collector
 from ingest.trigger import S3Filter, S3ObjectCreated
-from csda_ingest.data_models import SpireItem, StacItem, Nothing
-
-
-class ExtractSpire(Transformer[S3Object, SpireItem]):
-    permissions = [S3ReadAccess(bucket_name="ekeeble-ingest-test")]
-
-    @classmethod
-    def execute(self, input: S3Object) -> SpireItem:
-        import json
-        from smart_open import smart_open
-
-        with smart_open(f"s3://{input.bucket}/{input.key}") as f:
-            data = json.load(f)
-            item = SpireItem(**data)
-            return item
+from csda_ingest.data_models import SpireItem, StacItem
+from csda_ingest.steps.extract_spire import ExtractSpire
 
 
 class ExtractSpireThumbnail(Transformer[SpireItem, SpireItem]):
@@ -73,7 +61,9 @@ parallel_operation = Pipeline(
 
 csda_app = IngestApp(
     "CSDA Ingest",
-    code_dir=str(pathlib.Path(__file__).parent.resolve()),
-    requirements_path="requirements.txt",
+    code_dir=Path(__file__).parent,
+    requirements_path=Path(
+        Path(__file__).parent.resolve() / "requirements.txt"
+    ).resolve(),
     pipelines=[spire_pipeline],
 )

@@ -1,0 +1,2 @@
+pydantic==1.9.0
+smart-open==5.2.1
